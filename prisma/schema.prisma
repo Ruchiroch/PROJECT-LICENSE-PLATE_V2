@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id       Int       @id @default(autoincrement())
+  firstname     String    @db.VarChar(50) // กำหนดชนิดเป็น VARCHAR()
+  lastname      String    @db.VarChar(50)
+  email         String    @unique @db.VarChar(50)
+  password      String?   @db.VarChar(255)
+  telephone     String?   @db.VarChar(20)
+  status        String?   @db.VarChar(50)
+  role          String    @default("user") @db.VarChar(20)
+  provider      String?   @db.VarChar(50)
+  notifications Boolean   @default(true)
+  created_at    DateTime  @default(now()) @db.Timestamptz(3)
+  updated_at    DateTime  @db.Timestamptz(3) @updatedAt
+  cars          Car[]
+}
+
+model Car {
+  car_id        Int      @id @default(autoincrement())
+  car_brand     String   @db.VarChar(20)
+  car_model     String   @db.VarChar(20)
+  car_color     String?  @db.VarChar(20)
+  license_plate String   @unique @db.VarChar(20)
+  province_plate String? @db.VarChar(50)
+  created_at    DateTime @default(now()) @db.Timestamptz(3)
+  updated_at    DateTime @db.Timestamptz(3) @updatedAt
+  user_id       Int
+  user          User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model Camera {
+  camera_id     Int            @id @default(autoincrement())
+  camera_name   String         @db.VarChar(20)
+  camera_mode   String         @db.VarChar(20)
+  created_at    DateTime       @default(now()) @db.Timestamptz(3)
+  updated_at    DateTime       @db.Timestamptz(3) @updatedAt
+  detection_logs DetectionLog[] 
+}
+
+
+model DetectionLog {
+  detection_id             Int       @id @default(autoincrement())
+  detection_license_plate  String    @db.VarChar(20)
+  detection_province_plate String?   @db.VarChar(30)
+  detection_time           DateTime  @default(now()) @db.Timestamptz(3) 
+  image_base64             String?   @db.Text
+  action                   String   @db.VarChar(20)
+  detection_status         String?   @db.VarChar(20)
+  camera_id                Int
+  camera                   Camera    @relation(fields: [camera_id], references: [camera_id])
+}
+
+
